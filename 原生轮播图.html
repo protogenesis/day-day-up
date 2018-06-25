@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./font-awesome/font-awesome-4.7.0/css/font-awesome.css">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: #3a3a3a;
+        }
+
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        div {
+            width: 1000px;
+            height: 350px;
+            margin: 150px auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        ul {
+            width: 500%;
+            height: 100%;
+            position: absolute;
+        }
+
+        li {
+            float: left;
+            width: 20%;
+            height: 100%;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .prev,
+        .next {
+            position: absolute;
+            top: 50%;
+            margin-top: -25px;
+            width: 30px;
+            height: 50px;
+            background-color: #000;
+            opacity: .5;
+            text-align: center;
+            line-height: 50px;
+            color: #fff;
+            font-size: 18px;
+            transition: all .5s;
+            display: none;
+        }
+
+        .prev:hover,
+        .next:hover {
+            font-size: 22px;
+            color: hotpink;
+            opacity: 1;
+        }
+
+        .prev {
+            left: 0;
+        }
+
+        .next {
+            right: 0;
+        }
+
+        .pagenation {
+            position: absolute;
+            width: 200px;
+            height: 20px;
+            left: 0;
+            right: 0;
+            bottom: 10px;
+            padding: 0 20px;
+            margin: auto;
+        }
+
+        .pagenation span {
+            float: left;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+            margin: 0 10px;
+            background-color: #fff;
+        }
+
+        .pagenation span.active {
+            background-color: #ff5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <ul>
+            <li>
+                <img src="./images/u=1259620097,1634162801&fm=27&gp=0.jpg" alt="">
+            </li>
+            <li>
+                <img src="./images/u=1399246036,1982571090&fm=27&gp=0.jpg" alt="">
+            </li>
+            <li>
+                <img src="./images/u=1723506406,762272408&fm=200&gp=0.jpg" alt="">
+            </li>
+            <li>
+                <img src="./images/u=2514979041,2320927666&fm=27&gp=0.jpg" alt="">
+            </li>
+            <li>
+                <img src="./images/u=1259620097,1634162801&fm=27&gp=0.jpg" alt="">
+            </li>
+        </ul>
+        <div class="prev">
+            <i class="fa fa-chevron-left"></i>
+        </div>
+        <div class="next">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+        <div class="pagenation">
+            <span class="active">1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+    // 找到需要操作的元素
+    const container = document.querySelector('.container');
+    const ul = document.querySelector('ul');
+    const lis = document.querySelectorAll('li');
+    const prev = document.querySelector('.prev');
+    const next = document.querySelector('.next');
+    var spans = document.querySelectorAll('.pagenation>span');
+    // 不允许连续点击,默认允许点击
+    var flag = true;
+    // 执行动画的id和每秒执行一次的id
+    var timer_id, timer_id_next;
+    // 默认页码为1,索引为0
+    var page = 0;
+    // 获取图片的宽度
+    const width = lis[0].offsetWidth;
+    // 移入移出显影上一页和下一页,移入时停止轮播图
+    container.addEventListener('mouseenter', function () {
+        prev.style.display = "block";
+        next.style.display = "block";
+        clearInterval(timer_id_next);
+    });
+    // 当鼠标移出时重新开始自动轮播
+    container.addEventListener('mouseleave', function () {
+        prev.style.display = "none";
+        next.style.display = "none";
+        autoScroll();
+    });
+
+    // 给下一页注册点击事件,让ul滑动一张图片的宽度
+    next.addEventListener('click', function () {
+        nextView();
+    });
+    // 给上一页注册点击事件,每点击一次page--,如果page等于第一张,让page等于最后一张
+    prev.addEventListener('click', function () {
+        // 判断是不是连续点击,如果是,不执行第二次的事件
+        if (flag) {
+            page--;
+            if (page < 0) {
+                ul.style.left = -(lis.length - 1) * width + "px"; //让ul立即移动到最后一张图片
+                page = lis.length - 2;                            //移动到最后一张图片后,偏移值应该是最后一张图片的上一张图片的位置
+            };
+            var offset = -page * width;
+
+            animate(offset);
+
+            toggleClass();
+        };
+    });
+    /*  
+        先取得要滑动的目标距离,
+        与现有距离相减,得到的值为要滚动的值,
+        让ul原本的偏移值加上要滚动的值求出应该滚动到的目标偏移值,赋值给一个变量,
+        然后ul每次滑动之前判断是否超过或等于这个变量,如果超过了就直接到目标值,否则继续
+        
+    */
+    function animate(target) {
+        // 判断是否连续点击
+        if (flag) {
+            // 进来以后在动画执行完毕前不允许再次点击
+            flag = false;
+            // 获取ul的初始偏移值
+            var x = parseInt(getComputedStyle(ul).left);
+            // 获取需要滚动的偏移值
+            var differ = target - x;
+            // 已经滚动了的偏移值,默认为0
+            var offseted = 0;
+            // 用目标偏移值减去初始偏移值,得到差,判断是正是负,如果是负,ul应该往右边继续滚动,取值为负,如果为正,ul要往左边滚动,往左边滚动等于在初始值上做减法,因为初始值不可能为正数,所以取正数
+            var step = target - x < 0 ? -9 : 9;
+
+            timer_id = setInterval(function () {
+                // 得到已经滚动的偏移值的距离
+                offseted += step;
+                // 根据已经便宜的距离 求出是否大于要滚动的偏移值,因为有可能为负数,所以去绝对值
+                if (Math.abs(offseted) >= Math.abs(differ)) {
+                    // 如果大于或等于,结束动画并跳转到最终需要滚动的偏移值
+                    clearInterval(timer_id);
+                    ul.style.left = target + "px";
+                    // 启用点击按钮
+                    flag = true;
+                } else {
+                    // ul的匀速动画
+                    ul.style.left = x + offseted + "px";
+                };
+            }, 5);
+        } else {
+            return;
+        };
+    };
+
+    function nextView() {
+        // 下一张的执行函数,先判断是否连续点击
+        if (flag) {
+            // 页码+1
+            page++;
+            // 判断页面是否到了最后一张图片,最后一张图片其实是第一张图片,如果到了让ul的left立即改为0,page也为0
+            if (page >= lis.length) {
+                ul.style.left = "0";
+                page = 1;
+            };
+            var offset = -page * width;
+            animate(offset);
+            // 切换页码
+            toggleClass();
+        };
+    };
+    // 定义自动滚动函数,就是不断调用下一张的函数
+    function autoScroll() {
+        timer_id_next = setInterval(nextView, 1000);
+    };
+    // 一开始默认执行
+    autoScroll();
+
+    // 给页码添加点击事件
+    function pageGo() {
+        // 点击后立即响应 清除原来的动画 执行新的动画
+        flag = true;
+        clearInterval(timer_id);
+        page = this.innerHTML - 1;
+
+        var offset = -page * width;
+
+        animate(offset);
+        toggleClass();
+    };
+    // 给所有页码注册点击事件
+    for (let i = 0; i < spans.length; i++) {
+        spans[i].addEventListener('click', pageGo);
+    };
+    // 页码高亮显示函数
+    function toggleClass() {
+        for (var i = 0; i < spans.length; i++) {
+            spans[i].classList.remove('active');
+        };
+        if (page >= 4) {
+            spans[0].classList.add('active');
+            return;
+        };
+        spans[page].classList.add('active');
+    };
+</script>
