@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+<script>
+    var arr = [123,123,223,333,443,123,222,444,2,2,1,4,5,2];
+    var newarr = [arr[0]];
+    var flag = true;
+    for(var i = 0;i<arr.length;i++) {
+        for(var j = 0;j<newarr.length;j++) {
+            if(newarr[j] === arr[i]) {
+                flag = false;
+            }
+        }
+        if(flag) {
+            newarr.push(arr[i]);
+        };
+        flag = true;
+    };
+    console.log(newarr);
+</script>
