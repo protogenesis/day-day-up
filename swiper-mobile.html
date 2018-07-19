@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        html,body {
+            padding: 0;
+            margin: 0;
+        }
+        div {
+            width: 100%;
+            height: 300px;
+            margin: 200px auto;
+            overflow: hidden;
+        }
+        ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            width: 500%;
+            height: 100%;
+        }
+        li {
+            float: left;
+            width: 20%;
+            height: 100%;
+            background-color: #ccc;
+        }
+        li:nth-of-type(2) {
+            background-color: #F42;
+        }
+        li:nth-of-type(3) {
+            background: #d35;
+        }
+        li:nth-of-type(4) {
+            background: #567;
+        }
+        li:nth-of-type(5) {
+            background-color: #232323;
+        }
+        .page {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background-color: red;
+
+        }
+    </style>
+</head>
+<body>
+    <div>
+            <ul>
+                    <li>1</li>
+                    <li>2</li>
+                    <li>3</li>
+                    <li>4</li>
+                    <li>5</li>
+                </ul>
+    </div>
+    <!-- <div class="page"></div> -->
+</body>
+</html>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    $(function(){
+        // 监听Ul的触摸事件,滑动时记录触摸的坐标
+        // 监听Ul的移动事件,移动时相对应的平移 用移动时的坐标-刚触摸时坐标
+        // 监听ul的结束事件,得到松手时的坐标,与开始时的相减,如果大于30 则页码+1并平移,如果小于30 页码不便,回到原来的位置
+        var ul =  document.querySelector('ul');
+        var start_x,end_x,page=0,x=0;
+
+        ul.addEventListener('touchstart',function(e) {
+            start_x = e.touches[0].pageX;
+        })
+        ul.addEventListener('touchmove',function(e){
+            // console.log(e.touches[0].pageX);
+            var $ul = $('ul');
+            var offset;
+            offset = e.touches[0].pageX - start_x;
+            if(page == 0) {
+                return;
+            }
+            if(page == -4) {
+                return;
+            }
+            // console.log(offset);
+            ul.style.transition = "auto";
+            ul.style.transform = "translateX("+  (x+offset)  +"px)"
+            
+        })
+        ul.addEventListener('touchend',function(e) {
+            // console.log(e);
+            var offset = e.changedTouches[0].pageX - start_x;
+
+            if(offset>30) {
+                page++;
+                
+            }
+            if(offset < -30) {
+                page--;
+            }
+            
+            if(page > 0) page = 0;
+            // console.log(page);
+            if(page <= -5) page = -4;
+            // console.log(page);
+            
+            x = page * $("li").width();
+            
+            $('ul').css({
+                    transition:"all 0.3s",
+                    transform:"translateX("+ x +"px)"
+            })
+        })
+    })
+    // document.querySelector('.page').addEventListener('touchmove',function(e){
+    //     $(this).css({
+    //         left:e.touches[0].pageX
+    //     })
+    // })
+</script>
